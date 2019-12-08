@@ -3,14 +3,14 @@ AddEventHandler('playerDropped', function(reason)
 	if #players > 1 then
 		local randomPlayerIndex = math.random( #players )
 		local player = players[ randomPlayerIndex ]
-		print('Disconnected player name: ' .. GetPlayerName(source))
+		--print('Disconnected player name: ' .. GetPlayerName(source))
 		if(GetPlayerName(player) == GetPlayerName(source)) then
 			if(randomPlayerIndex > 1) then
 				randomPlayerIndex = randomPlayerIndex - 1
-				print('Decreased by 1')
+				--print('Decreased by 1')
 			else
 				randomPlayerIndex = randomPlayerIndex + 1
-				print('Increased by 1')
+				--print('Increased by 1')
 			end
 			player = players[ randomPlayerIndex ]
 		end
