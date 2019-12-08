@@ -1,4 +1,4 @@
-﻿// Uncomment #undefine line to suppress logging
+// Uncomment #undefine line to suppress logging
 #define DEBUG
 //#undef DEBUG
 
@@ -133,26 +133,34 @@ namespace RemoveVehicles_2_0 {
             #endregion
 
             #region Removing vehicles
+            // First request control of entites
+            for (int i = vehicles.Count - 1; i >= 0; i--) {
+                NetworkRequestControlOfEntity(vehicles[i].Handle);
+            }
+
+            // Proceed with deleting
             for (int i = vehicles.Count - 1; i >= 0; i--) {
                 DebugLog("Removing " + vehicles[i].ClassLocalizedName.ToString() + ", " + vehicles[i].DisplayName.ToString() + "...");
+                if (vehicles[i].DisplayName.ToString() != "CARNOTFOUND") {
+                    // Prepare for deletion
+                    int timeout = 15000;
+                    while (!NetworkHasControlOfEntity(vehicles[i].Handle) && timeout > 0) {
+                        timeout -= 100;
+                        await Delay(100);
+                    }
 
-                // Prepare for deletion
-                NetworkRequestControlOfEntity(vehicles[i].Handle);
-                int timeout = 15000;
-                while (!NetworkHasControlOfEntity(vehicles[i].Handle) && timeout > 0) {
-                    timeout -= 100;
-                    await Delay(100);
-                }
-
-                if (timeout > 0) {
-                    vehicles[i].PreviouslyOwnedByPlayer = false;
-                    SetEntityAsMissionEntity(vehicles[i].Handle, true, true);
-                    // Finally delete the vehicle
-                    vehicles[i].Delete();
-                    vehicles.RemoveAt(i);
-                    DebugLog("Removed properly!");
+                    if (timeout > 0) {
+                        vehicles[i].PreviouslyOwnedByPlayer = false;
+                        SetEntityAsMissionEntity(vehicles[i].Handle, true, true);
+                        // Finally delete the vehicle
+                        vehicles[i].Delete();
+                        vehicles.RemoveAt(i);
+                        DebugLog("Removed properly!");
+                    } else {
+                        DebugLog("Timeout reached for getting control of entity, skipping vehicle deletion.");
+                    }
                 } else {
-                    DebugLog("Timeout reached for getting control of entity, skipping vehicle deletion.");
+                    DebugLog("Car not found, skipping vehicle deletion.");
                 }
             }
             vehicles.Clear();
