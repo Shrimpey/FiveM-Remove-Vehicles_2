@@ -1,4 +1,5 @@
-AddEventHandler('playerDropped', function(reason)	
+AddEventHandler('playerDropped', function(reason)
+	local source = source
 	local players = GetPlayers()
 	if #players > 1 then
 		local randomPlayerIndex = math.random( #players )
