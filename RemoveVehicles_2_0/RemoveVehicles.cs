@@ -1,4 +1,4 @@
-// Uncomment #undefine line to suppress logging
+﻿// Uncomment #undefine line to suppress logging
 #define DEBUG
 //#undef DEBUG
 
@@ -133,6 +133,7 @@ namespace RemoveVehicles_2_0 {
             #endregion
 
             #region Removing vehicles
+
             // First request control of entites
             for (int i = vehicles.Count - 1; i >= 0; i--) {
                 NetworkRequestControlOfEntity(vehicles[i].Handle);
@@ -141,6 +142,12 @@ namespace RemoveVehicles_2_0 {
             // Proceed with deleting
             for (int i = vehicles.Count - 1; i >= 0; i--) {
                 DebugLog("Removing " + vehicles[i].ClassLocalizedName.ToString() + ", " + vehicles[i].DisplayName.ToString() + "...");
+
+                #if (DEBUG)
+                // Check entityowner
+                DebugLog("Owner before acquiring control: " + NetworkGetEntityOwner(vehicles[i].Handle));
+                #endif
+
                 if (vehicles[i].DisplayName.ToString() != "CARNOTFOUND") {
                     // Prepare for deletion
                     int timeout = 15000;
@@ -150,8 +157,15 @@ namespace RemoveVehicles_2_0 {
                     }
 
                     if (timeout > 0) {
+                        #if (DEBUG)
+                        // Check entityowner again
+                        DebugLog("Owner after acquiring control: " + NetworkGetEntityOwner(vehicles[i].Handle));
+                        #endif
+
                         vehicles[i].PreviouslyOwnedByPlayer = false;
                         SetEntityAsMissionEntity(vehicles[i].Handle, true, true);
+                        // Additionally conceal the entity (should make removing vehicles more consistent)
+                        NetworkConcealEntity(vehicles[i].Handle, true);
                         // Finally delete the vehicle
                         vehicles[i].Delete();
                         vehicles.RemoveAt(i);
